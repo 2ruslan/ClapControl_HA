@@ -15,6 +15,8 @@ class Detector:
         self.peak = 0.0
         self.previous = 0.002
         self.frames = 0
+        self.audio_time = 0.0
+        self.threshold = 0.0
         self.candidate = None
         self.blocked_until = 0
         self.window = np.hanning(FRAME_SAMPLES)
@@ -29,8 +31,13 @@ class Detector:
         self.level = rms
         self.peak = float(np.max(np.abs(x)))
         self.frames += 1
+        # PCM duration is independent of pipe buffering and process scheduling.
+        # Keep the arrival argument for callers, but never use it for DSP timing.
+        self.audio_time = (self.frames - 1) * FRAME_SAMPLES / SAMPLE_RATE
+        now = self.audio_time
         threshold = max(0.008 + 0.025 * (1 - self.sensitivity),
                         self.noise * (3 + 5 * (1 - self.sensitivity)))
+        self.threshold = threshold
         detected = False
         if self.candidate is not None:
             start, peak, high_ratio, flatness = self.candidate

@@ -46,7 +46,7 @@ async function poll() {
   try {
     const s = await api('api/status');
     const names = {running:'Працює',disabled:'Вимкнений',error:'Помилка',connected:'Підключений',connecting:'Підключення',stopped:'Зупинений'};
-    const rows = [['Детектор',names[s.detector_status]],['Мікрофон',names[s.audio_status]],['Тестування',s.test_mode?'Увімкнено':'Вимкнено'],['Хлопків / серій',`${s.claps} / ${s.sequences}`],['Активацій',s.activations],['Остання серія',s.last_trigger ? new Date(s.last_trigger).toLocaleString('uk-UA') : 'Ще не було'],['Остання активована сцена',s.last_scene || 'Ще не було'],['Номер останньої активації',s.scene_number],['Сцен у поточному списку',s.total_scenes],['RMS / фон / peak',`${s.level} / ${s.noise} / ${s.peak}`]];
+    const rows = [['Детектор',names[s.detector_status]],['Мікрофон',names[s.audio_status]],['Тестування',s.test_mode?'Увімкнено':'Вимкнено'],['Хлопків / серій',`${s.claps} / ${s.sequences}`],['Активацій',s.activations],['Остання серія',s.last_trigger ? new Date(s.last_trigger).toLocaleString('uk-UA') : 'Ще не було'],['Остання активована сцена',s.last_scene || 'Ще не було'],['Номер останньої активації',s.scene_number],['Сцен у поточному списку',s.total_scenes],['Макс. RMS / фон / макс. peak (1 с)',`${s.level} / ${s.noise} / ${s.peak}`],['Поріг RMS',s.threshold]];
     $('status').replaceChildren();
     rows.forEach(([label,value]) => {const div=document.createElement('div'), small=document.createElement('small');div.className='metric';small.textContent=label;div.append(small,document.createTextNode(String(value)));$('status').append(div);});
     $('level').value=s.level; $('errors').textContent=[s.audio_error,s.error,s.event_error].filter(Boolean).join(' · ');

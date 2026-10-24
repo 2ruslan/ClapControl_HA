@@ -65,3 +65,19 @@ class ApplicationTests(unittest.TestCase):
         self.app.on_audio_status('error','disconnected')
         self.app.on_frame(bytes(320),1.3)
         self.assertEqual(self.app.sequence.pending,0)
+
+    def test_batched_pcm_sequence(self):
+        self.app.settings=Settings(test_mode=True)
+        x=signal([(1,.3),(1.5,.3)])
+        for i in range(0,len(x),160):
+            self.app.on_frame(pcm(x[i:i+160]),(i//1600)*.1)
+        self.assertEqual(self.app.status()['claps'],2)
+        self.assertEqual(self.app.status()['sequences'],1)
+
+    def test_diagnostics_hold_short_peak_then_expire(self):
+        self.app.on_frame(pcm(signal([(0,.3)])[:160]),1)
+        for i in range(1,30):self.app.on_frame(bytes(320),1+i*.01)
+        self.assertGreater(self.app.status()['peak'],.1)
+        self.assertGreater(self.app.status()['threshold'],0)
+        for i in range(30,150):self.app.on_frame(bytes(320),1+i*.01)
+        self.assertEqual(self.app.status()['peak'],0)

@@ -4,7 +4,7 @@
 <body><main>
 <header><span class="eyebrow">HOME ASSISTANT · LOCAL AUDIO</span><h1>Clap Control</h1><p>Ваші сцени — за хлопком у долоні.</p></header>
 <div id="message" role="status" aria-live="polite"></div>
-<section><h2>Стан і діагностика</h2><div id="status" class="metrics"></div><label for="level">Рівень звуку</label><meter id="level" min="0" max="0.4" value="0"></meter><p id="errors" role="alert"></p><p class="hint">Лічильники — від запуску. Рівні RMS/peak: 0–1. Аудіо обробляється лише в пам’яті.</p></section>
+<section><h2>Стан і діагностика</h2><div id="status" class="metrics"></div><label for="level">Рівень звуку</label><meter id="level" min="0" max="0.4" value="0"></meter><p id="errors" role="alert"></p><p class="hint">Лічильники — від запуску. RMS/peak — максимуми за останню секунду (0–1). Поріг RMS залежить від фону; його перевищення ще не гарантує розпізнавання хлопка. Аудіо обробляється лише в пам’яті.</p></section>
 <form id="settings"><section><h2>Розпізнавання</h2>
 <label class="check"><input type="checkbox" id="enabled"> Увімкнути детектор</label>
 <label class="check"><input type="checkbox" id="test_mode"> Тестування хлопків — без активації сцен і подій</label>

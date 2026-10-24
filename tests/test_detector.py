@@ -28,6 +28,16 @@ def run(x, sensitivity=50):
 
 
 class DetectorTests(unittest.TestCase):
+    def test_batched_delivery_does_not_change_detection(self):
+        x = signal([(1, .3), (1.5, .3)])
+        detector = Detector()
+        hits = []
+        for offset in range(0, len(x), FRAME_SAMPLES):
+            arrival = (offset // 1600) * .1  # 100 ms of PCM arrives together.
+            if detector.process(pcm(x[offset:offset + FRAME_SAMPLES]), arrival):
+                hits.append(offset / 16000)
+        self.assertEqual(hits, run(x)[0])
+
     def test_single_impulse(self):
         self.assertEqual(len(run(signal([(1, .3)]))[0]), 1)
 

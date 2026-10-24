@@ -6,6 +6,7 @@ import queue
 import signal
 import threading
 import time
+from collections import deque
 from datetime import datetime, timezone
 
 from .audio import Audio
@@ -61,10 +62,14 @@ class Application:
             self.sequence = Sequence(settings.clap_count, settings.max_interval_ms / 1000,
                                      settings.cooldown_seconds)
             self.audio_generation = generation
+            self.recent_levels = deque(maxlen=100)
         detected = self.detector.process(frame, now)
+        self.recent_levels.append((self.detector.level, self.detector.peak))
         if now - self.last_diagnostic >= 0.25:
-            self.diagnostics.update(level=round(self.detector.level, 5),
-                                    noise=round(self.detector.noise, 5), peak=round(self.detector.peak, 5))
+            self.diagnostics.update(level=round(max(x[0] for x in self.recent_levels), 5),
+                                    noise=round(self.detector.noise, 5),
+                                    peak=round(max(x[1] for x in self.recent_levels), 5),
+                                    threshold=round(self.detector.threshold, 5))
             self.last_diagnostic = now
         if not settings.enabled or self.busy.is_set():
             self.sequence.pending = 0
@@ -72,7 +77,7 @@ class Application:
         if detected:
             self.diagnostics.increment("claps")
             LOG.debug("Clap: level=%.4f noise=%.4f", self.detector.level, self.detector.noise)
-            if self.sequence.clap(now):
+            if self.sequence.clap(self.detector.audio_time):
                 self.diagnostics.increment("sequences")
                 timestamp = datetime.now(timezone.utc).isoformat()
                 self.diagnostics.update(last_trigger=timestamp)
