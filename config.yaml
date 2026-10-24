@@ -1,6 +1,7 @@
 name: Clap Control
 version: "1.0.0"
 slug: clap_control
+url: https://github.com/2ruslan/ClapControl_HA
 description: Local clap detection and cyclic Home Assistant scene control
 arch:
   - amd64

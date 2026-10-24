@@ -4,7 +4,7 @@ from zipfile import ZipFile, ZIP_DEFLATED
 
 root = Path(__file__).resolve().parents[1]
 files = [root / name for name in (
-    'config.yaml', 'Dockerfile', 'run.sh', 'requirements.txt',
+    'config.yaml', 'repository.yaml', 'Dockerfile', 'run.sh', 'requirements.txt',
     'README.md', 'DOCS.md', 'CHANGELOG.md', 'VALIDATION.md',
     '.dockerignore', '.gitignore', '.gitattributes')]
 for directory in ('clap_control', 'tests', 'scripts', '.github'):
