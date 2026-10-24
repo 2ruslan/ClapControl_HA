@@ -74,3 +74,26 @@ class DetectorTests(unittest.TestCase):
     def test_frame_contract(self):
         with self.assertRaises(ValueError):
             Detector().process(b'bad', 1)
+
+    def test_reverberant_clap_at_high_sensitivity(self):
+        x=signal()
+        t=np.arange(4000)
+        x[16000:20000] += np.random.default_rng(9).normal(0,.3,4000)*np.exp(-t/1400)
+        hits,d=run(x,100)
+        self.assertEqual(len(hits),1)
+        self.assertEqual(d.last_analysis['reason'],'accepted')
+
+    def test_rejection_reason_for_tone(self):
+        x=signal()
+        t=np.arange(640)/16000
+        x[16000:16640] += .3*np.sin(2*np.pi*300*t)*np.exp(-t*80)
+        hits,d=run(x,100)
+        self.assertEqual(hits,[])
+        self.assertIn(d.last_analysis['reason'],('spectrum','tonal'))
+
+    def test_high_sensitivity_still_rejects_sustained_sound(self):
+        x=signal()
+        x[16000:24000] += np.random.default_rng(4).normal(0,.15,8000)
+        hits,d=run(x,100)
+        self.assertEqual(hits,[])
+        self.assertIsNotNone(d.last_analysis)

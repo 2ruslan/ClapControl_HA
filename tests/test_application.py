@@ -34,6 +34,13 @@ class ApplicationTests(unittest.TestCase):
     def test_missing_scene_rejected(self):
         with self.assertRaises(ValueError):self.app.save_settings(Settings(scenes=['scene.missing']).to_dict())
 
+    def test_web_cannot_override_log_level(self):
+        self.app.settings=Settings(log_level='DEBUG')
+        self.app.save_settings({'sensitivity':80,'log_level':'ERROR'})
+        self.assertEqual(self.app.settings.log_level,'DEBUG')
+        self.assertEqual(self.app.settings.sensitivity,80)
+        self.assertNotIn('log_level',self.app.web_settings())
+
     def test_old_generation_dropped(self):
         self.app.settings=Settings(scenes=['scene.a'])
         self.app.activate(-1,time.monotonic())

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.2
+
+- Moved log_level to Supervisor configuration; removed it from the web panel and prevented web saves from changing it.
+- Evaluate the strongest attack frame and allow more reverberation/reduced treble at high sensitivity while retaining duration and spectral gates.
+- Show the last impulse decision and measured features; add rate-limited DEBUG diagnostics for rejected candidates.
+- Corrected the sound meter to use the full 0–1 RMS range.
+- Added tests for logging ownership, reverberant claps and rejected sounds. Hardware validation is still required.
+
 ## 1.1.1
 
 - Fixed missed claps when PulseAudio delivers multiple PCM frames together: pulse duration, echo rejection and sequences now use the audio sample clock.

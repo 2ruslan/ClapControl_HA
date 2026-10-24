@@ -60,7 +60,7 @@ def serve(app, address=("0.0.0.0", 8099)):
             if path == "/api/status":
                 self.send(200, app.status())
             elif path == "/api/settings":
-                self.send(200, app.settings.to_dict())
+                self.send(200, app.web_settings())
             elif path == "/api/scenes":
                 try:
                     self.send(200, app.api.scenes())
@@ -86,7 +86,7 @@ def serve(app, address=("0.0.0.0", 8099)):
                 if not 0 < length <= 65536:
                     raise ValueError("Invalid request size")
                 app.save_settings(json.loads(self.rfile.read(length)))
-                self.send(200, app.settings.to_dict())
+                self.send(200, app.web_settings())
             except (ValueError, TypeError) as exc:
                 self.send(400, {"error": str(exc)})
             except (APIError, OSError) as exc:

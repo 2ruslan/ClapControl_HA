@@ -52,3 +52,18 @@ class MigrationTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             load_settings(self.directory)
         self.assertEqual(path.read_text(), '{broken')
+
+    def test_supervisor_log_level_does_not_replace_detector_settings(self):
+        values = Settings(sensitivity=85, scenes=['scene.a'], log_level='ERROR').to_dict()
+        self.write('settings.json', {'version':2, 'settings':values})
+        self.write('options.json', {'log_level':'DEBUG'})
+        loaded = load_settings(self.directory)
+        self.assertEqual(loaded.log_level, 'DEBUG')
+        self.assertEqual(loaded.sensitivity, 85)
+        self.assertEqual(loaded.scenes, ['scene.a'])
+
+    def test_old_ingress_preserved_with_logging_only_options(self):
+        values = Settings(sensitivity=85).to_dict()
+        self.write('settings.json', {'supervisor_options':Settings().to_dict(), 'settings':values})
+        self.write('options.json', {'log_level':'DEBUG'})
+        self.assertEqual(load_settings(self.directory).sensitivity, 85)

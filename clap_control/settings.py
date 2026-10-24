@@ -1,4 +1,4 @@
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 import json
 import re
 from pathlib import Path
@@ -53,14 +53,16 @@ def load_settings(directory: Path):
     """Migrate 1.0 options once, then use only the Ingress settings file."""
     saved_path = directory / "settings.json"
     saved = json.loads(saved_path.read_text(encoding="utf-8")) if saved_path.exists() else None
-    if saved is not None and saved.get("version") == 2:
-        return Settings.parse(saved["settings"])
     options_path = directory / "options.json"
     options = json.loads(options_path.read_text(encoding="utf-8")) if options_path.exists() else {}
+    log_level = Settings.parse({"log_level": options.get("log_level", "INFO")}).log_level
+    if saved is not None and saved.get("version") == 2:
+        return replace(Settings.parse(saved["settings"]), log_level=log_level)
     baseline = Settings.parse(options).to_dict()
-    if saved is not None and (not options or saved.get("supervisor_options") == baseline):
+    if saved is not None and (not (set(options) - {"log_level"}) or saved.get("supervisor_options") == baseline):
         settings = Settings.parse(saved["settings"])
     else:
         settings = Settings.parse(baseline)
+    settings = replace(settings, log_level=log_level)
     atomic_json(saved_path, {"version": 2, "settings": settings.to_dict()})
     return settings

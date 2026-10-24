@@ -43,6 +43,7 @@ class Application:
         self.last_diagnostic = 0
         self.last_audio_log = 0
         self.last_save = float("-inf")
+        self.last_analysis_log = float("-inf")
         self.audio = Audio(self.stop, self.restart, lambda: self.settings.audio_source,
                            self.on_frame, self.on_audio_status)
 
@@ -69,8 +70,12 @@ class Application:
             self.diagnostics.update(level=round(max(x[0] for x in self.recent_levels), 5),
                                     noise=round(self.detector.noise, 5),
                                     peak=round(max(x[1] for x in self.recent_levels), 5),
-                                    threshold=round(self.detector.threshold, 5))
+                                    threshold=round(self.detector.threshold, 5),
+                                    last_analysis=self.detector.last_analysis)
             self.last_diagnostic = now
+        if self.detector.analysis_changed and now - self.last_analysis_log >= 1:
+            LOG.debug("Impulse analysis: %s", self.detector.last_analysis)
+            self.last_analysis_log = now
         if not settings.enabled or self.busy.is_set():
             self.sequence.pending = 0
             return
@@ -122,7 +127,9 @@ class Application:
             self.activate(generation, detected_at)
 
     def save_settings(self, values):
-        settings = Settings.parse(values)
+        if not isinstance(values, dict):
+            raise ValueError("Expected settings object")
+        settings = Settings.parse({**values, "log_level": self.settings.log_level})
         with self.operation:
             if time.monotonic() - self.last_save < 1:
                 raise ValueError("Please wait one second between saves")
@@ -138,6 +145,11 @@ class Application:
             self.last_save = time.monotonic()
             self.restart.set()
             logging.getLogger().setLevel(settings.log_level)
+
+    def web_settings(self):
+        values = self.settings.to_dict()
+        values.pop("log_level")
+        return values
 
     def status(self):
         data = self.diagnostics.snapshot()
