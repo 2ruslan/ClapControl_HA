@@ -23,7 +23,7 @@ LOG = logging.getLogger("clap_control")
 class Application:
     def __init__(self, directory, api):
         self.directory = Path(directory)
-        self.settings, self.baseline = load_settings(self.directory)
+        self.settings = load_settings(self.directory)
         self.api = api
         self.state = State(self.directory / "state.json")
         self.cycle = SceneCycle(api, self.state)
@@ -127,7 +127,7 @@ class Application:
                 if missing:
                     raise ValueError("Scenes do not exist: " + ", ".join(sorted(missing)))
             atomic_json(self.directory / "settings.json",
-                        {"supervisor_options": self.baseline, "settings": settings.to_dict()})
+                        {"version": 2, "settings": settings.to_dict()})
             self.settings = settings
             self.generation += 1
             self.last_save = time.monotonic()

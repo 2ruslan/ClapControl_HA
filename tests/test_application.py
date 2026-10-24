@@ -19,12 +19,12 @@ class ApplicationTests(unittest.TestCase):
         self.api.scenes.return_value=[{'entity_id':'scene.a'},{'entity_id':'scene.b'}]
         self.app=Application(self.directory,self.api)
 
-    def test_settings_survive_and_supervisor_override(self):
+    def test_settings_survive_and_ignore_supervisor_options(self):
         values=Settings(sensitivity=70,test_mode=True,scenes=['scene.a']).to_dict()
         self.app.save_settings(values)
-        self.assertEqual(load_settings(self.directory)[0].sensitivity,70)
+        self.assertEqual(load_settings(self.directory).sensitivity,70)
         (self.directory/'options.json').write_text(json.dumps({'sensitivity':30}))
-        self.assertEqual(load_settings(self.directory)[0].sensitivity,30)
+        self.assertEqual(load_settings(self.directory).sensitivity,70)
 
     def test_validation(self):
         for values in ({'clap_count':4},{'enabled':1},{'scenes':['light.a']},

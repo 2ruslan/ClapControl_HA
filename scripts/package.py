@@ -10,7 +10,10 @@ files = [root / name for name in (
 for directory in ('clap_control', 'tests', 'scripts', '.github'):
     files.extend(p for p in (root / directory).rglob('*')
                  if p.is_file() and '__pycache__' not in p.parts and p.suffix != '.pyc')
-output = root / 'clap-control-1.0.0.zip'
+version = next(line.split(':', 1)[1].strip().strip('"')
+               for line in (root / 'config.yaml').read_text().splitlines()
+               if line.startswith('version:'))
+output = root / f'clap-control-{version}.zip'
 with ZipFile(output, 'w', ZIP_DEFLATED) as archive:
     for path in sorted(files):
         archive.write(path, 'clap_control/' + path.relative_to(root).as_posix())
